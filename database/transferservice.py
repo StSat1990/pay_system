@@ -47,6 +47,29 @@ def get_card_transaction_db(card_from_id):
 
     return card_transaction
 
-#Отмена транзакции
-def cancel_transfer_db(card_from, card_to, amount, transaction_id):
-    pass
+# Отменить перевод
+def cancel_transfer_db(card_from, card_to, amount, transfer_id):
+    db = next(get_db())
+    # Проверка на наличии карты в бд обеих карт
+    check_card_from = validate_card(card_from, db)
+    check_card_to = validate_card(card_to, db)
+    # Если обе карты существуют в бд перевод
+    if check_card_from and check_card_to:
+        # Проверить баланс того кто возвращает деньги
+        if check_card_to.balance >= amount:
+            # Отнимаем тому кто получил до этого
+            check_card_to.balance -= amount
+            # Добавляем у того кто отправил до этого
+            check_card_from.balance += amount
+
+            # Сохраняем в базе
+            exact_transaction = db.query(Transfer).filter_by(transfer_id=transfer_id).first()
+            exact_transaction.status = False
+
+            db.commit()
+
+            return "Перервод успешно отменен"
+        else:
+            return "Недостаточно средств на балансе"
+
+    return "Одна из карт не существует"

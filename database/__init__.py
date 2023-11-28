@@ -2,29 +2,29 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 
-#Ссылка для БД
+# Ссылку для БД
 SQLALCHEMY_DATABASE_URI = "sqlite:///pay.db"
 
-#Подключение к БД
+# Подключения к БД
 engine = create_engine(SQLALCHEMY_DATABASE_URI)
 
-#Генерация сессии
+# Генерация сессий
 SessionLocal = sessionmaker(bind=engine)
 
-#Общий класс для моделей(models.py)
+# Общий класс для моделей что бы использовать внутри models.py
 Base = declarative_base()
 
-#Импорт моделей
 from database import models
 
-#Функция для генерация связей к базе данных
+# Функция для генерации связей к базе данных
 def get_db():
-    db = SessionLocal
+    db = SessionLocal()
     try:
         yield db
+
     except Exception:
         db.rollback()
         raise
+
     finally:
         db.close()
-
